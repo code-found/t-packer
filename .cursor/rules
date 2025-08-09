@@ -1,0 +1,30 @@
+- 项目基础
+  - 语言: TypeScript。
+  - 目录结构: 源码在 `src`，构建产物在 `dist`，禁止在其他目录存放可发布源码。
+  - Node 版本: >= 18。
+
+- 包管理
+  - 仅使用 `pnpm`（不要使用 npm/yarn）。
+
+- 运行与构建
+  - 开发运行使用 `rts.js`（脚本: `pnpm dev` -> `rts ./src/index.ts`）。
+  - 构建使用 `tsc`，从 `src` 输出到 `dist`，生成 `d.ts` 与 source map。
+  - ESM 目标: `moduleResolution: NodeNext`。
+
+- 代码规范
+  - TS 严格模式开启，导出仅使用命名导出，禁止 `export default`。
+  - 类名用 PascalCase；函数/方法/变量使用 camelCase。
+  - 保持纯 TS（不引入不必要运行时）。
+
+- 质量与校验
+  - Lint/Format 使用 `@biomejs/biome`：`pnpm lint` 与 `pnpm format`。
+  - `pnpm typecheck` 使用 `tsc --noEmit`。
+
+- 发布与版本
+  - 使用 Changesets 管理版本与发布；主分支为 `main`。
+  - GitHub Actions 使用 `changesets/action@v1`，通过 `NPM_TOKEN` 发布。
+
+- 其他
+  - `files` 仅包含 `dist`，确保发布包干净。
+  - 如需新增脚手架/CLI，请添加 `bin` 字段并保持 ESM。
+
