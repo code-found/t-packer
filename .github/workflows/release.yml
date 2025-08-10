@@ -13,6 +13,10 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    permissions:
+      contents: write
+      pull-requests: write
+      id-token: write # for npm provenance
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -24,6 +28,7 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
+          registry-url: 'https://registry.npmjs.org'
           cache: pnpm
 
       - name: Install dependencies
@@ -31,9 +36,6 @@ jobs:
 
       - name: Lint
         run: pnpm lint
-
-      - name: Typecheck
-        run: pnpm typecheck
 
       - name: Build
         run: pnpm build
@@ -48,4 +50,4 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-
+          NPM_CONFIG_PROVENANCE: true

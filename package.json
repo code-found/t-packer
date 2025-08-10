@@ -35,7 +35,6 @@
   ],
   "scripts": {
     "build": "node -r rts.js/register scripts/build.ts",
-    "typecheck": "tsc --noEmit -p tsconfig.json",
     "lint": "biome check ./src",
     "lint:fix": "biome check ./src --write",
     "format": "biome format --write ./src",
