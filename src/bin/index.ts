@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
-import { assemble } from "../index";
 import { program } from "commander";
+import { assemble } from "../index";
 
 program
   .option("-c, --cjs <output>", "output directory for CommonJS modules")

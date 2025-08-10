@@ -1,6 +1,10 @@
+import {
+  type JscTarget,
+  type Options,
+  transform,
+  transformSync,
+} from "@swc/core";
 import type { TransformerHook, TransformOptions } from ".";
-import { type JscTarget, transform, transformSync, type Options, } from "@swc/core";
-
 
 /**
  * Base SWC configuration for TS/TSX/JS/JSX files.
@@ -39,31 +43,36 @@ const SwcConfig: Options = {
  * SWC-powered transformer handling TS/TSX/JS/JSX to JS with source maps.
  */
 export const tsTransformer: TransformerHook = {
-  exts: [[".ts", ".js"], [".tsx", '.js'], ['.js', '.js'], [".jsx", '.js']],
+  exts: [
+    [".ts", ".js"],
+    [".tsx", ".js"],
+    [".js", ".js"],
+    [".jsx", ".js"],
+  ],
   transformSync: (code: Buffer, options: TransformOptions) => {
-    const result = transformSync(code.toString('utf-8'), {
+    const result = transformSync(code.toString("utf-8"), {
       ...SwcConfig,
       jsc: {
         ...SwcConfig.jsc,
         target: options.target as JscTarget,
       },
       module: {
-        type: options.module === 'esm' ? 'es6' : 'commonjs',
+        type: options.module === "esm" ? "es6" : "commonjs",
       },
     });
-    return { code: Buffer.from(result.code), map: result.map, }
+    return { code: Buffer.from(result.code), map: result.map };
   },
   transform: async (code: Buffer, options: TransformOptions) => {
-    const result = await transform(code.toString('utf-8'), {
+    const result = await transform(code.toString("utf-8"), {
       ...SwcConfig,
       jsc: {
         ...SwcConfig.jsc,
         target: options.target as JscTarget,
       },
       module: {
-        type: options.module === 'esm' ? 'es6' : 'commonjs',
+        type: options.module === "esm" ? "es6" : "commonjs",
       },
     });
-    return { code: Buffer.from(result.code), map: result.map, }
+    return { code: Buffer.from(result.code), map: result.map };
   },
 };

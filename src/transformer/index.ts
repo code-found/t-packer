@@ -1,8 +1,6 @@
 import path from "node:path";
 import { tsTransformer } from "./ts-transformer";
 
-
-
 /**
  * A transformer declaration that describes which extensions it handles
  * and how to transform code synchronously or asynchronously.
@@ -19,7 +17,9 @@ export interface TransformerHook {
   /**
    * Optional async transform; if provided, it will be preferred.
    */
-  transform?: (...args: Parameters<TransformProgram>) => Promise<ReturnType<TransformProgram>>;
+  transform?: (
+    ...args: Parameters<TransformProgram>
+  ) => Promise<ReturnType<TransformProgram>>;
 }
 
 /**
@@ -33,20 +33,22 @@ export interface TransformOptions {
 /**
  * The transform program signature.
  */
-export type TransformProgram = (code: Buffer, options: TransformOptions) => { code: Buffer | string, map?: string, };
-
-
-
+export type TransformProgram = (
+  code: Buffer,
+  options: TransformOptions,
+) => { code: Buffer | string; map?: string };
 
 /**
  * Registry and dispatcher for file transformers.
  */
 export class ModuleTransformer {
-
-  private transformers: Map<string, {
-    ext: [string, string];
-    hooks: TransformerHook;
-  }> = new Map();
+  private transformers: Map<
+    string,
+    {
+      ext: [string, string];
+      hooks: TransformerHook;
+    }
+  > = new Map();
 
   constructor(transformers: TransformerHook[] = []) {
     this.addTransformer(tsTransformer as TransformerHook);
@@ -54,8 +56,6 @@ export class ModuleTransformer {
       this.addTransformer(transformer);
     }
   }
-
-
 
   /**
    * Register a transformer and its handled extensions.
@@ -85,11 +85,14 @@ export class ModuleTransformer {
     }
   }
 
-
   /**
    * Transform a single file buffer based on its extension.
    */
-  async transform(code: Buffer, filename: string, options: TransformOptions): Promise<{ code: Buffer, map?: string, filename: string }> {
+  async transform(
+    code: Buffer,
+    filename: string,
+    options: TransformOptions,
+  ): Promise<{ code: Buffer; map?: string; filename: string }> {
     const transformers = this.transformers.get(path.extname(filename));
 
     if (transformers) {
@@ -108,7 +111,11 @@ export class ModuleTransformer {
   /**
    * Synchronous variant of transform. Keeps the same API shape.
    */
-  async transformSync(code: Buffer, filename: string, options: TransformOptions) {
+  async transformSync(
+    code: Buffer,
+    filename: string,
+    options: TransformOptions,
+  ) {
     const transformers = this.transformers.get(path.extname(filename));
     if (transformers) {
       filename = filename.replace(transformers.ext[0], transformers.ext[1]);
@@ -123,6 +130,4 @@ export class ModuleTransformer {
     }
     return { code, filename };
   }
-
-
 }
