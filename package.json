@@ -38,8 +38,8 @@
     "lint": "biome check ./src",
     "lint:fix": "biome check ./src --write",
     "format": "biome format --write ./src",
-    "version": "pnpm changeset version",
-    "publish": "pnpm changeset publish"
+    "changeset:version": "pnpm changeset version",
+    "changeset:publish": "pnpm changeset publish"
   },
   "engines": {
     "node": ">=18"
