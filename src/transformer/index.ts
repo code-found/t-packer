@@ -42,7 +42,7 @@ export type TransformProgram = (
  * Registry and dispatcher for file transformers.
  */
 export class ModuleTransformer {
-  private transformers: Map<
+  protected transformers: Map<
     string,
     {
       ext: [string, string];
@@ -111,7 +111,7 @@ export class ModuleTransformer {
   /**
    * Synchronous variant of transform. Keeps the same API shape.
    */
-  async transformSync(
+  transformSync(
     code: Buffer,
     filename: string,
     options: TransformOptions,
@@ -120,8 +120,7 @@ export class ModuleTransformer {
     if (transformers) {
       filename = filename.replace(transformers.ext[0], transformers.ext[1]);
       const transformer = transformers.hooks;
-      const transform = transformer.transform ?? transformer.transformSync;
-      const result = await transform(code, options);
+      const result = transformer.transformSync(code, options);
       return {
         code: result.code as Buffer,
         map: result.map,
