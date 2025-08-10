@@ -1,5 +1,14 @@
 # t-packer
 
+## 0.0.2
+
+### Patch Changes
+
+- 96f080f: add files to npm package
+
+  - add src package.json README.md docs to the release package
+  - change the bin file path to cjs
+
 ## 0.0.1
 
 ### Patch Changes
