@@ -1,5 +1,11 @@
 # t-packer
 
+## 0.0.3
+
+### Patch Changes
+
+- 70d0c11: expose registry for subclassing and make transformSync truly synchronous
+
 ## 0.0.2
 
 ### Patch Changes

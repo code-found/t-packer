@@ -1,6 +1,6 @@
 {
   "name": "t-packer",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "private": false,
   "description": "TypeScript npm 打包工具",
   "main": "./src/index.ts",
