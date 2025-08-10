@@ -20,7 +20,7 @@
     "import": "./dist/esm/index.js",
     "require": "./dist/cjs/index.js",
     "bin": {
-      "t-packer": "./dist/bin/index.js"
+      "t-packer": "./dist/bin/cjs/index.js"
     },
     "exports": {
       ".": {
@@ -31,7 +31,13 @@
     }
   },
   "files": [
-    "dist"
+    "dist",
+    "src",
+    "package.json",
+    "README.md",
+    "LICENSE",
+    "pnpm-lock.yaml",
+    "docs"
   ],
   "scripts": {
     "build": "node -r rts.js/register scripts/build.ts",
