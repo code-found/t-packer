@@ -111,11 +111,7 @@ export class ModuleTransformer {
   /**
    * Synchronous variant of transform. Keeps the same API shape.
    */
-  transformSync(
-    code: Buffer,
-    filename: string,
-    options: TransformOptions,
-  ) {
+  transformSync(code: Buffer, filename: string, options: TransformOptions) {
     const transformers = this.transformers.get(path.extname(filename));
     if (transformers) {
       filename = filename.replace(transformers.ext[0], transformers.ext[1]);
