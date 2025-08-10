@@ -48,12 +48,12 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/your/repo.git"
+    "url": "git+https://github.com/code-found/t-packer.git"
   },
   "bugs": {
-    "url": "https://github.com/your/repo/issues"
+    "url": "https://github.com/code-found/t-packer/issues"
   },
-  "homepage": "https://github.com/your/repo#readme",
+  "homepage": "https://github.com/code-found/t-packer#readme",
   "keywords": [
     "typescript",
     "npm",
