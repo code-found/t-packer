@@ -20,7 +20,7 @@
     "import": "./dist/esm/index.js",
     "require": "./dist/cjs/index.js",
     "bin": {
-      "t-packer": "./dist/bin/cjs/index.js"
+      "t-packer": "./dist/cjs/bin/index.js"
     },
     "exports": {
       ".": {
