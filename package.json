@@ -5,6 +5,9 @@
 	"description": "TypeScript npm 打包工具",
 	"main": "./src/index.ts",
 	"types": "./src/index.ts",
+	"bin": {
+		"t-packer": "./src/bin/index.ts"
+	},
 	"exports": {
 		".": {
 			"types": "./src/index.ts",
@@ -16,7 +19,7 @@
 		"dist"
 	],
 	"scripts": {
-		"build": "tsc -p tsconfig.json",
+		"build": "node -r rts.js/register scripts/build.ts",
 		"typecheck": "tsc --noEmit -p tsconfig.json",
 		"lint": "biome check .",
 		"format": "biome format --write .",
@@ -36,19 +39,6 @@
 		"url": "https://github.com/your/repo/issues"
 	},
 	"homepage": "https://github.com/your/repo#readme",
-	"publishConfig": {
-		"access": "public",
-		"registry": "https://registry.npmjs.org",
-		"main": "./dist/cjs/index.js",
-		"module": "./dist/esm/index.js",
-		"exports": {
-			".": {
-				"types": "./src/index.ts",
-				"import": "./dist/esm/index.js",
-				"require": "./dist/cjs/index.js"
-			}
-		}
-	},
 	"keywords": [
 		"typescript",
 		"npm",
@@ -61,5 +51,10 @@
 		"@types/node": "^24.2.1",
 		"rts.js": "^0.0.6",
 		"typescript": "^5.9.2"
+	},
+	"dependencies": {
+		"@swc/core": "^1.13.3",
+		"install": "^0.13.0",
+		"pnpm": "^10.14.0"
 	}
 }
