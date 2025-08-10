@@ -1,4 +1,5 @@
 import path from "node:path";
+import { tsTransformer } from "./ts-transformer";
 
 
 
@@ -48,6 +49,7 @@ export class ModuleTransformer {
   }> = new Map();
 
   constructor(transformers: TransformerHook[] = []) {
+    this.addTransformer(tsTransformer as TransformerHook);
     for (const transformer of transformers) {
       this.addTransformer(transformer);
     }

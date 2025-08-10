@@ -2,15 +2,14 @@ import path from "path";
 import type { Options } from "./config";
 import fs from "fs";
 import { ModuleTransformer } from "./transformer";
-import { tsTransformer } from "./transformer/ts-transformer";
 
+export { ModuleTransformer, type TransformerHook, type TransformOptions, type TransformProgram } from "./transformer";
 
 /**
  * Central transformer registry for the build pipeline.
  * Registers the TypeScript/TSX transformer powered by SWC.
  */
 const moduleTransformer = new ModuleTransformer();
-moduleTransformer.addTransformer(tsTransformer);
 
 /**
  * Recursively transform files from `src` into `output` using the configured transformers.
