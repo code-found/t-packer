@@ -1,18 +1,25 @@
 import path from "path";
 import type { Options } from "./config";
 import fs from "fs";
-import { TransformerManager } from "./transformer";
+import { ModuleTransformer } from "./transformer";
 import { tsTransformer } from "./transformer/ts-transformer";
 
 
-const transformerManager = new TransformerManager();
+/**
+ * Central transformer registry for the build pipeline.
+ * Registers the TypeScript/TSX transformer powered by SWC.
+ */
+const moduleTransformer = new ModuleTransformer();
+moduleTransformer.addTransformer(tsTransformer);
 
-transformerManager.addTransfromer([".ts", ".tsx"], tsTransformer);
-
+/**
+ * Recursively transform files from `src` into `output` using the configured transformers.
+ */
 const transform = async ({ src, output, module, target }: { src: string, output: string, module: 'cjs' | 'esm', target: string }) => {
   const root = path.resolve(process.cwd(), src);
   const dist = path.resolve(process.cwd(), output);
 
+  // Read directory entries and process them in parallel
   const files = await fs.promises.readdir(root);
   await Promise.all(files.map(async (file) => {
     const filePath = path.resolve(root, file);
@@ -21,24 +28,31 @@ const transform = async ({ src, output, module, target }: { src: string, output:
       await transform({ src: filePath, output: path.join(dist, file), module, target });
     } else {
       const basename = path.basename(filePath);
-      const { code, map, name } = await transformerManager.transform(basename, await fs.promises.readFile(filePath, 'utf-8'), { target, module });
+      // Transform file content and determine final filename
+      const { code, map, filename } = await moduleTransformer.transform(await fs.promises.readFile(filePath), basename, { target, module });
       if (!fs.existsSync(dist)) {
         await fs.promises.mkdir(dist, { recursive: true });
       }
-      await fs.promises.writeFile(path.join(dist, name ?? basename), code);
+      await fs.promises.writeFile(path.join(dist, filename ?? basename), code);
       if (map) {
-        await fs.promises.writeFile(path.join(dist, (name ?? basename) + '.map'), map);
+        await fs.promises.writeFile(path.join(dist, (filename ?? basename) + '.map'), map);
       }
     }
   }));
 };
+/**
+ * Assemble the project to the desired module formats.
+ * - Cleans target directories
+ * - Builds CJS and/or ESM in parallel
+ * - Prints timing information
+ */
 export const assemble = async (options: Options = {}) => {
   const timer = new Date();
   const { src = "./src", output = "./dist", cjs = { output: "./cjs" }, esm = { output: "./esm" }, target = "es2020" } = options;
   const root = path.resolve(process.cwd(), src);
   const dist = path.resolve(process.cwd(), output);
 
-  const tasks: Promise<void>[] = []
+  const tasks: Promise<void>[] = [];
   if (cjs) {
     fs.rmSync(path.join(dist, cjs.output), { recursive: true, force: true });
     tasks.push(transform({ src: root, output: path.join(dist, cjs.output), module: 'cjs', target }));
@@ -49,5 +63,5 @@ export const assemble = async (options: Options = {}) => {
   }
 
   await Promise.all(tasks);
-  console.log(`assemble success in ${new Date().getTime() - timer.getTime()}ms`);
+  console.log(`assemble success in ${Date.now() - timer.getTime()}ms`);
 };
