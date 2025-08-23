@@ -41,6 +41,7 @@
   ],
   "scripts": {
     "build": "rts scripts/build.ts",
+    "build:examples": "rts scripts/build-examples.ts",
     "lint": "biome check ./src",
     "lint:fix": "biome check ./src --write",
     "format": "biome format --write ./src",
@@ -70,12 +71,13 @@
     "@biomejs/biome": "^2.1.4",
     "@changesets/cli": "^2.29.5",
     "@types/node": "^24.2.1",
-    "rts.js": "^0.0.11",
+    "rts.js": "^0.0.12",
     "typescript": "^5.9.2"
   },
   "dependencies": {
     "@swc/core": "^1.13.3",
     "commander": "^14.0.0",
+    "esbuild": "^0.25.9",
     "install": "^0.13.0",
     "pnpm": "^10.14.0"
   }
