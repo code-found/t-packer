@@ -15,6 +15,18 @@ interface RequireItem {
   requireIdentifier: string;
 }
 
+const findPackageJSON = (file: string) => {
+  let dir = file;
+  while (dir !== dirname(dir)) {
+    dir = dirname(dir);
+    const packageJson = join(dir, 'package.json');
+    if (fs.existsSync(packageJson)) {
+      return packageJson;
+    }
+  }
+  return null;
+};
+
 const findRequires = (code: string) => {
   const results: RequireItem[] = [];
 
@@ -256,6 +268,70 @@ const findRequires = (code: string) => {
       }
     }
 
+    // try match export ... from "x"
+    if (matchWordAt(i, 'export')) {
+      let j = i + 'export'.length;
+      j = skipWhitespace(j);
+      // We only care about re-exports: export * from "x"; export { ... } from "x"; export type { ... } from "x";
+      // Scan forward until ';' or newline, then find `from <string>` and record it
+      let k = j;
+      let innerInS = false;
+      let innerInD = false;
+      while (k < length) {
+        const ck = code[k];
+        if (!innerInS && !innerInD && ck === ';') break;
+        if (!innerInS && !innerInD && (ck === '\n' || ck === '\r')) break;
+        if (!innerInS && ck === '"') {
+          innerInD = true;
+          k++;
+          continue;
+        }
+        if (!innerInD && ck === "'") {
+          innerInS = true;
+          k++;
+          continue;
+        }
+        if (innerInS) {
+          if (ck === '\\') {
+            k += 2;
+            continue;
+          }
+          if (ck === "'") {
+            innerInS = false;
+            k++;
+            continue;
+          }
+          k++;
+          continue;
+        }
+        if (innerInD) {
+          if (ck === '\\') {
+            k += 2;
+            continue;
+          }
+          if (ck === '"') {
+            innerInD = false;
+            k++;
+            continue;
+          }
+          k++;
+          continue;
+        }
+        // try find 'from'
+        if (code.startsWith('from', k)) {
+          let f = k + 4;
+          f = skipWhitespace(f);
+          const lit = parseStringAt(f);
+          if (lit) {
+            addResult(lit.value, lit.quote);
+            i = lit.end;
+            break;
+          }
+        }
+        k++;
+      }
+    }
+
     i++;
   }
 
@@ -311,13 +387,15 @@ export const transform = async ({
       fileMap.get(src)?.compiled ||
       isBuiltin(src) ||
       !fs.existsSync(src) ||
-      (!includeModules && src.includes('node_modules'))
+      (!includeModules &&
+        (src.includes('node_modules') || !src.startsWith(root)))
     ) {
       /**
        * if the file has transformed, return the output
        * if the file is a builtin module, we don't need to transform it
        * if the file does not exist, we don't need to transform it
        * if the file is in node_modules, and includeModules is false, we don't need to transform it
+       * if the file is not in the root directory, it may means from its a dependency from workspace, should treat it as node_modules
        */
       return fileMap.get(src)?.output ?? '';
     }
@@ -332,19 +410,20 @@ export const transform = async ({
         compiled: false,
       });
       let fileContent: Buffer | string = await fs.promises.readFile(src);
-      const dist = src.includes('node_modules')
-        ? join(
-            output,
-            dirname(
-              src
-                .slice(
-                  src.lastIndexOf('node_modules') + 'node_modules'.length,
-                  src.length,
-                )
-                .replace('@', ''),
-            ),
-          )
-        : dirname(join(output, src.replace(root, '')));
+      let dist = dirname(join(output, src.replace(root, '')));
+      const isDependencyFile =
+        src.includes('node_modules') || !src.startsWith(root);
+      if (isDependencyFile) {
+        const packageJson = findPackageJSON(src);
+        if (packageJson) {
+          const packageJsonData = JSON.parse(
+            fs.readFileSync(packageJson, 'utf-8'),
+          );
+          const { name, version = '' } = packageJsonData;
+          dist = join(output, name.replace('@', '') + version);
+        }
+      }
+
       if (isModule(src)) {
         fileContent = fileContent.toString('utf-8');
         const requires = findRequires(fileContent);
