@@ -1,15 +1,14 @@
-import fs from "node:fs";
-
-import { ModuleTransformer } from "./transformer";
-import { createRequire, isBuiltin } from "node:module";
-import { basename, dirname, join, resolve, relative, sep } from "node:path";
+import fs from 'node:fs';
+import { createRequire, isBuiltin } from 'node:module';
+import { basename, dirname, join, relative, resolve, sep } from 'node:path';
+import { ModuleTransformer } from './transformer';
 
 const isModule = (file: string) => {
   return (
-    file.endsWith(".ts") ||
-    file.endsWith(".tsx") ||
-    file.endsWith(".js") ||
-    file.endsWith(".jsx")
+    file.endsWith('.ts') ||
+    file.endsWith('.tsx') ||
+    file.endsWith('.js') ||
+    file.endsWith('.jsx')
   );
 };
 interface RequireItem {
@@ -35,12 +34,12 @@ const findRequires = (code: string) => {
   let inBC = false; // /* */
 
   const isWhitespace = (ch: string) =>
-    ch === " " ||
-    ch === "\n" ||
-    ch === "\r" ||
-    ch === "\t" ||
-    ch === "\f" ||
-    ch === "\v";
+    ch === ' ' ||
+    ch === '\n' ||
+    ch === '\r' ||
+    ch === '\t' ||
+    ch === '\f' ||
+    ch === '\v';
 
   const skipWhitespace = (idx: number) => {
     while (idx < length && isWhitespace(code[idx])) idx++;
@@ -53,10 +52,10 @@ const findRequires = (code: string) => {
     const q = code[idx];
     if (q !== '"' && q !== "'") return null;
     let j = idx + 1;
-    let value = "";
+    let value = '';
     while (j < length) {
       const ch = code[j];
-      if (ch === "\\") {
+      if (ch === '\\') {
         // skip escaped char
         if (j + 1 < length) {
           value += code[j + 1];
@@ -80,12 +79,12 @@ const findRequires = (code: string) => {
 
     // handle comment states first
     if (inLC) {
-      if (ch === "\n") inLC = false;
+      if (ch === '\n') inLC = false;
       i++;
       continue;
     }
     if (inBC) {
-      if (ch === "*" && i + 1 < length && code[i + 1] === "/") {
+      if (ch === '*' && i + 1 < length && code[i + 1] === '/') {
         inBC = false;
         i += 2;
       } else {
@@ -96,7 +95,7 @@ const findRequires = (code: string) => {
 
     // strings/templates
     if (inS) {
-      if (ch === "\\") {
+      if (ch === '\\') {
         i += 2;
         continue;
       }
@@ -105,7 +104,7 @@ const findRequires = (code: string) => {
       continue;
     }
     if (inD) {
-      if (ch === "\\") {
+      if (ch === '\\') {
         i += 2;
         continue;
       }
@@ -114,22 +113,22 @@ const findRequires = (code: string) => {
       continue;
     }
     if (inT) {
-      if (ch === "\\") {
+      if (ch === '\\') {
         i += 2;
         continue;
       }
-      if (ch === "`") inT = false;
+      if (ch === '`') inT = false;
       i++;
       continue;
     }
 
     // enter comments/strings
-    if (ch === "/" && i + 1 < length && code[i + 1] === "/") {
+    if (ch === '/' && i + 1 < length && code[i + 1] === '/') {
       inLC = true;
       i += 2;
       continue;
     }
-    if (ch === "/" && i + 1 < length && code[i + 1] === "*") {
+    if (ch === '/' && i + 1 < length && code[i + 1] === '*') {
       inBC = true;
       i += 2;
       continue;
@@ -144,24 +143,24 @@ const findRequires = (code: string) => {
       i++;
       continue;
     }
-    if (ch === "`") {
+    if (ch === '`') {
       inT = true;
       i++;
       continue;
     }
 
     // try match require(
-    if (matchWordAt(i, "require")) {
-      let j = i + "require".length;
+    if (matchWordAt(i, 'require')) {
+      let j = i + 'require'.length;
       j = skipWhitespace(j);
-      if (j < length && code[j] === "(") {
+      if (j < length && code[j] === '(') {
         j++;
         j = skipWhitespace(j);
         const str = parseStringAt(j);
         if (str) {
           j = str.end;
           j = skipWhitespace(j);
-          if (j < length && code[j] === ")") {
+          if (j < length && code[j] === ')') {
             addResult(str.value, str.quote);
             i = j + 1;
             continue;
@@ -171,17 +170,17 @@ const findRequires = (code: string) => {
     }
 
     // try match import(
-    if (matchWordAt(i, "import")) {
-      let j = i + "import".length;
+    if (matchWordAt(i, 'import')) {
+      let j = i + 'import'.length;
       j = skipWhitespace(j);
-      if (j < length && code[j] === "(") {
+      if (j < length && code[j] === '(') {
         j++;
         j = skipWhitespace(j);
         const str = parseStringAt(j);
         if (str) {
           j = str.end;
           j = skipWhitespace(j);
-          if (j < length && code[j] === ")") {
+          if (j < length && code[j] === ')') {
             addResult(str.value, str.quote);
             i = j + 1;
             continue;
@@ -203,8 +202,8 @@ const findRequires = (code: string) => {
         let innerInD = false;
         while (k < length) {
           const ck = code[k];
-          if (!innerInS && !innerInD && ck === ";") break;
-          if (!innerInS && !innerInD && (ck === "\n" || ck === "\r")) break;
+          if (!innerInS && !innerInD && ck === ';') break;
+          if (!innerInS && !innerInD && (ck === '\n' || ck === '\r')) break;
           if (!innerInS && ck === '"') {
             innerInD = true;
             k++;
@@ -216,7 +215,7 @@ const findRequires = (code: string) => {
             continue;
           }
           if (innerInS) {
-            if (ck === "\\") {
+            if (ck === '\\') {
               k += 2;
               continue;
             }
@@ -229,7 +228,7 @@ const findRequires = (code: string) => {
             continue;
           }
           if (innerInD) {
-            if (ck === "\\") {
+            if (ck === '\\') {
               k += 2;
               continue;
             }
@@ -242,7 +241,7 @@ const findRequires = (code: string) => {
             continue;
           }
           // try find 'from'
-          if (code.startsWith("from", k)) {
+          if (code.startsWith('from', k)) {
             let f = k + 4;
             f = skipWhitespace(f);
             const lit = parseStringAt(f);
@@ -264,10 +263,10 @@ const findRequires = (code: string) => {
 };
 
 const resolveRequireFile = (filepath: string, cwd: string) => {
-  if (filepath.startsWith(".")) {
+  if (filepath.startsWith('.')) {
     filepath = resolve(dirname(cwd), filepath);
-    for (const ext of ["", `${sep}/index`].flatMap((x) =>
-      ["", ".js", ".ts", ".jsx", ".tsx"].map((y) => x + y),
+    for (const ext of ['', `${sep}/index`].flatMap((x) =>
+      ['', '.js', '.ts', '.jsx', '.tsx'].map((y) => x + y),
     )) {
       if (
         fs.existsSync(filepath + ext) &&
@@ -295,7 +294,7 @@ export const transform = async ({
 }: {
   src: string;
   output: string;
-  module: "cjs" | "esm";
+  module: 'cjs' | 'esm';
   target: string;
   includeModules?: boolean;
 }) => {
@@ -307,12 +306,12 @@ export const transform = async ({
       output?: string;
     }
   >();
-  const transformFile = async (src: string): Promise<string | void> => {
+  const transformFile = async (src: string): Promise<string | undefined> => {
     if (
       fileMap.get(src)?.compiled ||
       isBuiltin(src) ||
       !fs.existsSync(src) ||
-      (!includeModules && src.includes("node_modules"))
+      (!includeModules && src.includes('node_modules'))
     ) {
       /**
        * if the file has transformed, return the output
@@ -320,7 +319,7 @@ export const transform = async ({
        * if the file does not exist, we don't need to transform it
        * if the file is in node_modules, and includeModules is false, we don't need to transform it
        */
-      return fileMap.get(src)?.output ?? "";
+      return fileMap.get(src)?.output ?? '';
     }
     if (fs.statSync(src).isDirectory()) {
       const files = await fs.promises.readdir(src);
@@ -333,21 +332,21 @@ export const transform = async ({
         compiled: false,
       });
       let fileContent: Buffer | string = await fs.promises.readFile(src);
-      const dist = src.includes("node_modules")
+      const dist = src.includes('node_modules')
         ? join(
             output,
             dirname(
               src
                 .slice(
-                  src.lastIndexOf("node_modules") + "node_modules".length,
+                  src.lastIndexOf('node_modules') + 'node_modules'.length,
                   src.length,
                 )
-                .replace("@", ""),
+                .replace('@', ''),
             ),
           )
-        : dirname(join(output, src.replace(root, "")));
+        : dirname(join(output, src.replace(root, '')));
       if (isModule(src)) {
-        fileContent = fileContent.toString("utf-8");
+        fileContent = fileContent.toString('utf-8');
         const requires = findRequires(fileContent);
         for (const requireItem of requires) {
           const { requireIdentifier } = requireItem;
@@ -355,7 +354,7 @@ export const transform = async ({
           const filepath = requireIdentifier.slice(1, -1);
           const resolvedPath = resolveRequireFile(
             filepath,
-            filepath.startsWith(".") ? src : root,
+            filepath.startsWith('.') ? src : root,
           );
 
           /**
@@ -383,13 +382,13 @@ export const transform = async ({
            *
            */
           const output = fileMap.get(resolvedPath)
-            ? (fileMap.get(resolvedPath)?.output ?? "")
+            ? (fileMap.get(resolvedPath)?.output ?? '')
             : await transformFile(resolvedPath);
 
           if (output) {
             fileContent = fileContent.replaceAll(
               requireIdentifier,
-              `"./${relative(dist, output).replace(/\\/g, "/")}"`,
+              `"./${relative(dist, output).replace(/\\/g, '/')}"`,
             );
           }
         }
@@ -418,7 +417,7 @@ export const transform = async ({
         });
         return outputFile;
       } catch (e) {
-        console.log("error", e, src);
+        console.log('error', e, src);
       }
     }
   };
