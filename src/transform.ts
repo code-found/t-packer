@@ -15,6 +15,18 @@ interface RequireItem {
   requireIdentifier: string;
 }
 
+const findPackageJSON = (file: string) => {
+  let dir = file;
+  while (dir !== dirname(dir)) {
+    dir = dirname(dir);
+    const packageJson = join(dir, 'package.json');
+    if (fs.existsSync(packageJson)) {
+      return packageJson;
+    }
+  }
+  return null;
+};
+
 const findRequires = (code: string) => {
   const results: RequireItem[] = [];
 
@@ -311,13 +323,15 @@ export const transform = async ({
       fileMap.get(src)?.compiled ||
       isBuiltin(src) ||
       !fs.existsSync(src) ||
-      (!includeModules && src.includes('node_modules'))
+      (!includeModules &&
+        (src.includes('node_modules') || !src.startsWith(root)))
     ) {
       /**
        * if the file has transformed, return the output
        * if the file is a builtin module, we don't need to transform it
        * if the file does not exist, we don't need to transform it
        * if the file is in node_modules, and includeModules is false, we don't need to transform it
+       * if the file is not in the root directory, it may means from its a dependency from workspace, should treat it as node_modules
        */
       return fileMap.get(src)?.output ?? '';
     }
@@ -332,19 +346,20 @@ export const transform = async ({
         compiled: false,
       });
       let fileContent: Buffer | string = await fs.promises.readFile(src);
-      const dist = src.includes('node_modules')
-        ? join(
-            output,
-            dirname(
-              src
-                .slice(
-                  src.lastIndexOf('node_modules') + 'node_modules'.length,
-                  src.length,
-                )
-                .replace('@', ''),
-            ),
-          )
-        : dirname(join(output, src.replace(root, '')));
+      let dist = dirname(join(output, src.replace(root, '')));
+      const isDependencyFile =
+        src.includes('node_modules') || !src.startsWith(root);
+      if (isDependencyFile) {
+        const packageJson = findPackageJSON(src);
+        if (packageJson) {
+          const packageJsonData = JSON.parse(
+            fs.readFileSync(packageJson, 'utf-8'),
+          );
+          const { name, version = '' } = packageJsonData;
+          dist = join(output, name.replace('@', '') + version);
+        }
+      }
+
       if (isModule(src)) {
         fileContent = fileContent.toString('utf-8');
         const requires = findRequires(fileContent);
