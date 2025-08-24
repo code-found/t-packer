@@ -1,15 +1,15 @@
-import fs from "node:fs";
-import path from "node:path";
+import fs from 'node:fs';
+import path from 'node:path';
 
-import type { Options } from "./config";
-import { transform } from "./transform";
+import type { Options } from './config';
+import { transform } from './transform';
 
 export {
   ModuleTransformer,
   type TransformerHook,
   type TransformOptions,
   type TransformProgram,
-} from "./transformer";
+} from './transformer';
 
 /**
  * Assemble the project to the desired module formats.
@@ -19,11 +19,11 @@ export {
  */
 export const assemble = async (options: Options = {}) => {
   const {
-    src = "./src",
-    output = "./dist",
-    cjs = { output: "./cjs" },
-    esm = { output: "./esm" },
-    target = "es2020",
+    src = './src',
+    output = './dist',
+    cjs = { output: './cjs' },
+    esm = { output: './esm' },
+    target = 'es2020',
     includeModules,
   } = options;
   const root = path.resolve(process.cwd(), src);
@@ -35,7 +35,7 @@ export const assemble = async (options: Options = {}) => {
       transform({
         src: root,
         output: path.join(dist, cjs.output),
-        module: "cjs",
+        module: 'cjs',
         target,
         includeModules,
       }),
@@ -47,7 +47,7 @@ export const assemble = async (options: Options = {}) => {
       transform({
         src: root,
         output: path.join(dist, esm.output),
-        module: "esm",
+        module: 'esm',
         target,
         includeModules,
       }),

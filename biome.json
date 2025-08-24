@@ -7,6 +7,17 @@
     "lineWidth": 80,
     "lineEnding": "lf"
   },
+
+  "javascript": {
+    "formatter": {
+      "enabled": true,
+      "indentStyle": "space",
+      "indentWidth": 2,
+      "lineWidth": 80,
+      "lineEnding": "lf",
+      "quoteStyle": "single"
+    }
+  },
   "linter": {
     "enabled": true,
     "rules": {
