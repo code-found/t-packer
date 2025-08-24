@@ -20,4 +20,5 @@ export interface Options {
   cjs?: OutputOptions | null;
   esm?: OutputOptions | null;
   target?: string;
+  includeModules?: boolean;
 }

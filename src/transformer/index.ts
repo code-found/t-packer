@@ -1,5 +1,5 @@
-import path from "node:path";
-import { tsTransformer } from "./ts-transformer";
+import path from 'node:path';
+import { tsTransformer } from './ts-transformer';
 
 /**
  * A transformer declaration that describes which extensions it handles
@@ -34,7 +34,7 @@ export interface TransformOptions {
  * The transform program signature.
  */
 export type TransformProgram = (
-  code: Buffer,
+  code: Buffer | string,
   options: TransformOptions,
 ) => { code: Buffer | string; map?: string };
 
@@ -62,7 +62,7 @@ export class ModuleTransformer {
    */
   addTransformer(transformer: TransformerHook) {
     for (let ext of transformer.exts) {
-      ext = typeof ext === "string" ? [ext, ext] : ext;
+      ext = typeof ext === 'string' ? [ext, ext] : ext;
       const transformers = this.transformers.get(ext[0]);
       if (transformers) {
         transformers.hooks = transformer;
@@ -80,7 +80,7 @@ export class ModuleTransformer {
    */
   removeTransformer(transformer: TransformerHook) {
     for (let ext of transformer.exts) {
-      ext = typeof ext === "string" ? [ext, ext] : ext;
+      ext = typeof ext === 'string' ? [ext, ext] : ext;
       this.transformers.delete(ext[0]);
     }
   }
@@ -89,10 +89,10 @@ export class ModuleTransformer {
    * Transform a single file buffer based on its extension.
    */
   async transform(
-    code: Buffer,
+    code: Buffer | string,
     filename: string,
     options: TransformOptions,
-  ): Promise<{ code: Buffer; map?: string; filename: string }> {
+  ): Promise<{ code: Buffer | string; map?: string; filename: string }> {
     const transformers = this.transformers.get(path.extname(filename));
 
     if (transformers) {

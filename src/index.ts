@@ -24,10 +24,10 @@ export const assemble = async (options: Options = {}) => {
     cjs = { output: "./cjs" },
     esm = { output: "./esm" },
     target = "es2020",
+    includeModules,
   } = options;
   const root = path.resolve(process.cwd(), src);
   const dist = path.resolve(process.cwd(), output);
-
   const tasks: Promise<void>[] = [];
   if (cjs) {
     fs.rmSync(path.join(dist, cjs.output), { recursive: true, force: true });
@@ -37,6 +37,7 @@ export const assemble = async (options: Options = {}) => {
         output: path.join(dist, cjs.output),
         module: "cjs",
         target,
+        includeModules,
       }),
     );
   }
@@ -48,6 +49,7 @@ export const assemble = async (options: Options = {}) => {
         output: path.join(dist, esm.output),
         module: "esm",
         target,
+        includeModules,
       }),
     );
   }

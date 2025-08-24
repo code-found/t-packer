@@ -77,8 +77,6 @@
   "dependencies": {
     "@swc/core": "^1.13.3",
     "commander": "^14.0.0",
-    "esbuild": "^0.25.9",
-    "install": "^0.13.0",
     "pnpm": "^10.14.0"
   }
 }
