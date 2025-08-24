@@ -3,8 +3,8 @@ import {
   type Options,
   transform,
   transformSync,
-} from "@swc/core";
-import type { TransformerHook, TransformOptions } from ".";
+} from '@swc/core';
+import type { TransformerHook, TransformOptions } from '.';
 
 /**
  * Base SWC configuration for TS/TSX/JS/JSX files.
@@ -13,24 +13,24 @@ import type { TransformerHook, TransformOptions } from ".";
  */
 const SwcConfig: Options = {
   jsc: {
-    target: "es2020",
+    target: 'es2020',
     parser: {
-      syntax: "typescript",
+      syntax: 'typescript',
       tsx: true,
     },
     transform: {
       react: {
-        pragma: "React.createElement",
-        pragmaFrag: "React.Fragment",
+        pragma: 'React.createElement',
+        pragmaFrag: 'React.Fragment',
         throwIfNamespace: false,
         development: false,
         useBuiltins: false,
-        runtime: "automatic",
-        importSource: "react",
+        runtime: 'automatic',
+        importSource: 'react',
       },
       legacyDecorator: true,
       decoratorMetadata: true,
-      decoratorVersion: "2021-12",
+      decoratorVersion: '2021-12',
       useDefineForClassFields: true,
       verbatimModuleSyntax: true,
       tsEnumIsMutable: true,
@@ -44,33 +44,33 @@ const SwcConfig: Options = {
  */
 export const tsTransformer: TransformerHook = {
   exts: [
-    [".ts", ".js"],
-    [".tsx", ".js"],
-    [".js", ".js"],
-    [".jsx", ".js"],
+    ['.ts', '.js'],
+    ['.tsx', '.js'],
+    ['.js', '.js'],
+    ['.jsx', '.js'],
   ],
-  transformSync: (code: Buffer, options: TransformOptions) => {
-    const result = transformSync(code.toString("utf-8"), {
+  transformSync: (code: Buffer | string, options: TransformOptions) => {
+    const result = transformSync(code.toString('utf-8'), {
       ...SwcConfig,
       jsc: {
         ...SwcConfig.jsc,
         target: options.target as JscTarget,
       },
       module: {
-        type: options.module === "esm" ? "es6" : "commonjs",
+        type: options.module === 'esm' ? 'es6' : 'commonjs',
       },
     });
     return { code: Buffer.from(result.code), map: result.map };
   },
-  transform: async (code: Buffer, options: TransformOptions) => {
-    const result = await transform(code.toString("utf-8"), {
+  transform: async (code: Buffer | string, options: TransformOptions) => {
+    const result = await transform(code.toString('utf-8'), {
       ...SwcConfig,
       jsc: {
         ...SwcConfig.jsc,
         target: options.target as JscTarget,
       },
       module: {
-        type: options.module === "esm" ? "es6" : "commonjs",
+        type: options.module === 'esm' ? 'es6' : 'commonjs',
       },
     });
     return { code: Buffer.from(result.code), map: result.map };

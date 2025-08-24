@@ -14,9 +14,6 @@ importers:
       commander:
         specifier: ^14.0.0
         version: 14.0.0
-      install:
-        specifier: ^0.13.0
-        version: 0.13.0
       pnpm:
         specifier: ^10.14.0
         version: 10.14.0
@@ -31,8 +28,8 @@ importers:
         specifier: ^24.2.1
         version: 24.2.1
       rts.js:
-        specifier: ^0.0.9
-        version: 0.0.9
+        specifier: ^0.0.12
+        version: 0.0.12
       typescript:
         specifier: ^5.9.2
         version: 5.9.2
@@ -500,8 +497,8 @@ packages:
     resolution: {integrity: sha512-g6QUff04oZpHs0eG5p83rFLhHeV00ug/Yf9nZM6fLeUrPguBTkTQOdpAWWspMh55TZfVQDPaN3NQJfbVRAxdIw==}
     engines: {iojs: '>=1.0.0', node: '>=0.10.0'}
 
-  rts.js@0.0.9:
-    resolution: {integrity: sha512-ruGa0t/7Ep4QUry+vOHLIFsRUXAogfdzuq4iSzkxIVG5Hy+iZxNG2mddizLxrx/MBJW+7olksFL9KXpwpyxTnQ==}
+  rts.js@0.0.12:
+    resolution: {integrity: sha512-MLd1rwYS9/VgxxJbEVo65URIeL+Nby7pIv5EFFbLlcD04ONZVKW0KDzuSojPGtB86lc1yZg3AAh9lLnoUyai1Q==}
     hasBin: true
 
   run-parallel@1.2.0:
@@ -544,6 +541,11 @@ packages:
   strip-bom@3.0.0:
     resolution: {integrity: sha512-vavAMRXOgBVNF6nyEEmL3DBK19iRpDcoIwW+swQ+CbGiu7lju6t+JklA1MHweoWtadgt4ISVUsXLyDq34ddcwA==}
     engines: {node: '>=4'}
+
+  t-packer@0.0.3:
+    resolution: {integrity: sha512-URo2Yi73gaQATSw+4zV1LlhxUa/2kfD4fnV6B5LHw/6XjhDmowJnRmaQj6wx/rkJyx9VaC1TrFrVhUT4zaMANg==}
+    engines: {node: '>=18'}
+    hasBin: true
 
   term-size@2.2.1:
     resolution: {integrity: sha512-wK0Ri4fOGjv/XPy8SBHZChl8CM7uMc5VML7SqiQ0zG7+J5Vr+RMQDoHa2CNT6KHUnTGIXH34UDMkPzAUyapBZg==}
@@ -1045,9 +1047,10 @@ snapshots:
 
   reusify@1.1.0: {}
 
-  rts.js@0.0.9:
+  rts.js@0.0.12:
     dependencies:
       '@swc/core': 1.13.3
+      t-packer: 0.0.3
     transitivePeerDependencies:
       - '@swc/helpers'
 
@@ -1081,6 +1084,15 @@ snapshots:
       ansi-regex: 5.0.1
 
   strip-bom@3.0.0: {}
+
+  t-packer@0.0.3:
+    dependencies:
+      '@swc/core': 1.13.3
+      commander: 14.0.0
+      install: 0.13.0
+      pnpm: 10.14.0
+    transitivePeerDependencies:
+      - '@swc/helpers'
 
   term-size@2.2.1: {}
 
