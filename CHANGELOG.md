@@ -1,5 +1,11 @@
 # t-packer
 
+## 0.0.4
+
+### Patch Changes
+
+- 8713299: tranform feature add node modules support.
+
 ## 0.0.3
 
 ### Patch Changes
