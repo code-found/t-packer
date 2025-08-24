@@ -269,7 +269,10 @@ const resolveRequireFile = (filepath: string, cwd: string) => {
     for (const ext of ["", `${sep}/index`].flatMap((x) =>
       ["", ".js", ".ts", ".jsx", ".tsx"].map((y) => x + y),
     )) {
-      if (fs.existsSync(filepath + ext)) {
+      if (
+        fs.existsSync(filepath + ext) &&
+        fs.statSync(filepath + ext).isFile()
+      ) {
         return filepath + ext;
       }
     }
@@ -297,10 +300,16 @@ export const transform = async ({
   includeModules?: boolean;
 }) => {
   const moduleTransformer = new ModuleTransformer();
-  const fileMap = new Map<string, { compiled: boolean; output?: string }>();
+  const fileMap = new Map<
+    string,
+    {
+      compiled: boolean;
+      output?: string;
+    }
+  >();
   const transformFile = async (src: string): Promise<string | void> => {
     if (
-      fileMap.has(src) ||
+      fileMap.get(src)?.compiled ||
       isBuiltin(src) ||
       !fs.existsSync(src) ||
       (!includeModules && src.includes("node_modules"))
@@ -319,6 +328,10 @@ export const transform = async ({
         await transformFile(join(src, file));
       }
     } else {
+      // set the transform info
+      fileMap.set(src, {
+        compiled: false,
+      });
       let fileContent: Buffer | string = await fs.promises.readFile(src);
       const dist = src.includes("node_modules")
         ? join(
@@ -338,16 +351,40 @@ export const transform = async ({
         const requires = findRequires(fileContent);
         for (const requireItem of requires) {
           const { requireIdentifier } = requireItem;
-          if (fileMap.has(requireIdentifier)) {
-            continue;
-          }
           // because requireIdentifier is has quotes, we need to remove them
           const filepath = requireIdentifier.slice(1, -1);
           const resolvedPath = resolveRequireFile(
             filepath,
             filepath.startsWith(".") ? src : root,
           );
-          const output = await transformFile(resolvedPath);
+
+          /**
+           * circular dependency fix
+           * example:
+           * file a.ts
+           * import { b } from "./b";
+           *
+           * export a = {}
+           *
+           * file b.ts
+           * import { a } from "./a";
+           *
+           * export b = {a}
+           * when we transform a.ts, we will get the output of b.ts
+           * but b.ts will also need to import a.ts
+           * so we need to check if the a.ts is already in transform to prevent circular dependency
+           *
+           * but here is still a problem
+           * if a.ts is not transformed, the output of a.ts is empty
+           * and we can't replace the requireIdentifier with the output of a.ts
+           * it may cause some error
+           *
+           * maybe we should fix it in the future
+           *
+           */
+          const output = fileMap.get(resolvedPath)
+            ? (fileMap.get(resolvedPath)?.output ?? "")
+            : await transformFile(resolvedPath);
 
           if (output) {
             fileContent = fileContent.replaceAll(

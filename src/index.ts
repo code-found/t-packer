@@ -2,7 +2,7 @@ import fs from "node:fs";
 import path from "node:path";
 
 import type { Options } from "./config";
-import { transform } from "./transfrom";
+import { transform } from "./transform";
 
 export {
   ModuleTransformer,
