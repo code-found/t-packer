@@ -268,6 +268,70 @@ const findRequires = (code: string) => {
       }
     }
 
+    // try match export ... from "x"
+    if (matchWordAt(i, 'export')) {
+      let j = i + 'export'.length;
+      j = skipWhitespace(j);
+      // We only care about re-exports: export * from "x"; export { ... } from "x"; export type { ... } from "x";
+      // Scan forward until ';' or newline, then find `from <string>` and record it
+      let k = j;
+      let innerInS = false;
+      let innerInD = false;
+      while (k < length) {
+        const ck = code[k];
+        if (!innerInS && !innerInD && ck === ';') break;
+        if (!innerInS && !innerInD && (ck === '\n' || ck === '\r')) break;
+        if (!innerInS && ck === '"') {
+          innerInD = true;
+          k++;
+          continue;
+        }
+        if (!innerInD && ck === "'") {
+          innerInS = true;
+          k++;
+          continue;
+        }
+        if (innerInS) {
+          if (ck === '\\') {
+            k += 2;
+            continue;
+          }
+          if (ck === "'") {
+            innerInS = false;
+            k++;
+            continue;
+          }
+          k++;
+          continue;
+        }
+        if (innerInD) {
+          if (ck === '\\') {
+            k += 2;
+            continue;
+          }
+          if (ck === '"') {
+            innerInD = false;
+            k++;
+            continue;
+          }
+          k++;
+          continue;
+        }
+        // try find 'from'
+        if (code.startsWith('from', k)) {
+          let f = k + 4;
+          f = skipWhitespace(f);
+          const lit = parseStringAt(f);
+          if (lit) {
+            addResult(lit.value, lit.quote);
+            i = lit.end;
+            break;
+          }
+        }
+        k++;
+      }
+    }
+
     i++;
   }
 
