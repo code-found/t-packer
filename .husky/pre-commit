@@ -1,0 +1,6 @@
+#!/usr/bin/env sh
+. "$(dirname -- "$0")/_/husky.sh"
+
+# Run Biome fix and do not block the commit if fixes were applied
+pnpm lint-staged
+

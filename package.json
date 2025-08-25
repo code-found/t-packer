@@ -46,7 +46,8 @@
     "lint:fix": "biome check ./src --write",
     "format": "biome format --write ./src",
     "changeset:version": "pnpm changeset version",
-    "changeset:publish": "pnpm changeset publish"
+    "changeset:publish": "pnpm changeset publish",
+    "prepare": "husky"
   },
   "engines": {
     "node": ">=18"
@@ -71,6 +72,8 @@
     "@biomejs/biome": "^2.1.4",
     "@changesets/cli": "^2.29.5",
     "@types/node": "^24.2.1",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.1.5",
     "rts.js": "^0.0.12",
     "typescript": "^5.9.2"
   },
@@ -78,5 +81,11 @@
     "@swc/core": "^1.13.3",
     "commander": "^14.0.0",
     "pnpm": "^10.14.0"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,json,md,yml,yaml}": [
+      "biome check --write",
+      "git add -A"
+    ]
   }
 }
